@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          weather-client:
+            url: https://api.open-meteo.com
