@@ -11,6 +11,7 @@ public interface WeatherClient {
     WeatherData getWeatherData(
             @RequestParam("latitude") double latitude,
             @RequestParam("longitude") double longitude,
+            @RequestParam("hourly") String hourly,
             @RequestParam("daily") String daily
     );
 }

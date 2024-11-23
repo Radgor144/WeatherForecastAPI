@@ -1,18 +1,20 @@
 package com.radgor.WeatherForecast.weather;
 
-import com.radgor.WeatherForecast.weather.data.ProcessedData;
-import com.radgor.WeatherForecast.weather.data.ProcessedWeatherData;
 import com.radgor.WeatherForecast.weather.data.WeatherClient;
 import com.radgor.WeatherForecast.weather.data.WeatherData;
-import lombok.extern.slf4j.Slf4j;
+import com.radgor.WeatherForecast.weather.data.daily.ProcessedDailyData;
+import com.radgor.WeatherForecast.weather.data.daily.ProcessedWeatherDailyData;
+import com.radgor.WeatherForecast.weather.data.summary.SummaryWeatherData;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@Slf4j
+
 @Service
 public class WeatherService {
 
@@ -26,29 +28,90 @@ public class WeatherService {
         this.weatherClient = weatherClient;
     }
 
-    public ProcessedWeatherData getWeatherData(double latitude, double longitude) {
-        String dailyParams = "weather_code,temperature_2m_max,temperature_2m_min,daylight_duration";
-        WeatherData weatherData = weatherClient.getWeatherData(latitude, longitude, dailyParams);
-
-        return calculateEnergyAndMapWeatherData(weatherData);
+    @Cacheable(value = "WeatherData", key = "#latitude + '-' + #longitude")
+    public WeatherData getWeatherData(double latitude, double longitude) {
+        String dailyParams = "weather_code,temperature_2m_max,temperature_2m_min,sunshine_duration,precipitation_probability_max";
+        String hourlyParams = "surface_pressure";
+        return weatherClient.getWeatherData(latitude, longitude, hourlyParams, dailyParams);
     }
 
-    private ProcessedWeatherData calculateEnergyAndMapWeatherData(WeatherData weatherData) {
-        List<BigDecimal> generatedEnergy_kWh = new ArrayList<>();
-
-        for (BigDecimal daylightDuration : weatherData.daily().daylight_duration()) {
-            BigDecimal daylightHours = daylightDuration.divide(SECONDS_IN_AN_HOUR, 4, RoundingMode.HALF_UP); // Sekundy na godziny
-            BigDecimal energy = INSTALLATION_POWER_KW.multiply(daylightHours).multiply(PANEL_EFFICIENCY);
-            generatedEnergy_kWh.add(energy);
-        }
-
+    public ProcessedWeatherDailyData getProcessedWeatherData(double latitude, double longitude) {
+        WeatherData weatherData = getWeatherData(latitude, longitude);
+        List<BigDecimal> generatedEnergy_kWh = calculateEnergy(weatherData);
         return mapWeatherDataToProcessedWeatherData(weatherData, generatedEnergy_kWh);
     }
 
-    private ProcessedWeatherData mapWeatherDataToProcessedWeatherData(WeatherData weatherData, List<BigDecimal> generatedEnergy_kWh) {
-        return ProcessedWeatherData.builder()
+    public SummaryWeatherData getSummaryWeatherData(double latitude, double longitude) {
+        WeatherData weatherData = getWeatherData(latitude, longitude);
+        return mapToSummaryWeatherData(weatherData);
+    }
+
+    private List<BigDecimal> calculateAvgPressure(WeatherData weatherData) {
+        List<BigDecimal> hourlyPressures = weatherData.hourly().surface_pressure();
+        List<BigDecimal> avgPressures = new ArrayList<>();
+
+        BigDecimal sum = BigDecimal.ZERO;
+        int hoursInDay = 24;
+        int counter = 0;
+
+        for (int i = 0; i < hourlyPressures.size(); i++) {
+            BigDecimal hourlyPressure = hourlyPressures.get(i);
+            sum = sum.add(hourlyPressure);
+            counter++;
+
+            if (counter == hoursInDay) {
+                BigDecimal avg = sum.divide(BigDecimal.valueOf(hoursInDay), RoundingMode.HALF_UP);
+                avgPressures.add(avg);
+
+                sum = BigDecimal.ZERO;
+                counter = 0;
+            }
+        }
+
+        if (counter > 0) {
+            BigDecimal avg = sum.divide(BigDecimal.valueOf(counter), RoundingMode.HALF_UP);
+            avgPressures.add(avg);
+        }
+
+        return avgPressures;
+    }
+
+
+    private SummaryWeatherData mapToSummaryWeatherData(WeatherData weatherData) {
+
+        List<BigDecimal> avgPressure = calculateAvgPressure(weatherData);
+        List<BigDecimal> sunshineDuration = weatherData.daily().sunshine_duration();
+        List<Double> temperatureMax = weatherData.daily().temperature_2m_max();
+        List<Double> temperatureMin = weatherData.daily().temperature_2m_min();
+        List<String> precipitationSummary = weatherData.daily().precipitation_probability_max().stream()
+                .map(precipitation -> precipitation.compareTo(new BigDecimal("50.0")) >= 0 ? "z opadami" : "bez opadów")
+                .collect(Collectors.toList());
+
+        return new SummaryWeatherData(
+                avgPressure,
+                sunshineDuration,
+                temperatureMax,
+                temperatureMin,
+                precipitationSummary
+        );
+    }
+
+    private List<BigDecimal> calculateEnergy(WeatherData weatherData) {
+        List<BigDecimal> generatedEnergy_kWh = new ArrayList<>();
+
+        for (BigDecimal sunshine_duration : weatherData.daily().sunshine_duration()) {
+            BigDecimal sunshineHours = sunshine_duration.divide(SECONDS_IN_AN_HOUR, 4, RoundingMode.HALF_UP); // Sekundy na godziny
+            BigDecimal energy = INSTALLATION_POWER_KW.multiply(sunshineHours).multiply(PANEL_EFFICIENCY);
+            generatedEnergy_kWh.add(energy);
+        }
+
+        return generatedEnergy_kWh;
+    }
+
+    private ProcessedWeatherDailyData mapWeatherDataToProcessedWeatherData(WeatherData weatherData, List<BigDecimal> generatedEnergy_kWh) {
+        return ProcessedWeatherDailyData.builder()
                 .proccessedData(
-                        ProcessedData.builder()
+                        ProcessedDailyData.builder()
                                 .time(weatherData.daily().time())
                                 .weather_code(weatherData.daily().weather_code())
                                 .temperature_2m_max(weatherData.daily().temperature_2m_max())

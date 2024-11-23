@@ -1,4 +1,4 @@
-package com.radgor.WeatherForecast.weather.data;
+package com.radgor.WeatherForecast.weather.data.daily;
 
 import lombok.Builder;
 
@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Builder
-public record ProcessedData(
+public record ProcessedDailyData(
         List<String> time,
         List<Integer> weather_code,
         List<Double> temperature_2m_max,

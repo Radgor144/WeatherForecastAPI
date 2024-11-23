@@ -11,4 +11,5 @@ public record DailyResponse(
         List<Integer> weather_code,
         List<Double> temperature_2m_max,
         List<Double> temperature_2m_min,
-        List<BigDecimal> daylight_duration) {}
+        List<BigDecimal> sunshine_duration,
+        List<BigDecimal> precipitation_probability_max) {}
