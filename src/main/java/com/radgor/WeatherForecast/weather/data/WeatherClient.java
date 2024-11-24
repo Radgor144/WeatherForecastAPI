@@ -1,6 +1,5 @@
 package com.radgor.WeatherForecast.weather.data;
 
-import com.radgor.WeatherForecast.weather.config.RetryerConfig;
 import com.radgor.WeatherForecast.weather.config.WeatherClientConfiguration;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
