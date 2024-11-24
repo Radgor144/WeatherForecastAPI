@@ -2,7 +2,7 @@ server:
   port: 8080
 
 
-  spring:
+spring:
   cloud:
     openfeign:
       client:
