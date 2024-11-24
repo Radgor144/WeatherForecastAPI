@@ -1,14 +1,8 @@
-# Etap 1: Budowanie aplikacji
-FROM maven:3.8.6-openjdk-21 as build
-
-WORKDIR /app
+FROM maven:3.8.5-openjdk-17 AS build
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Etap 2: Uruchomienie aplikacji
-FROM eclipse-temurin:21-jdk AS runtime
-
-WORKDIR /app
-COPY --from=build /app/target/WeatherForecast-0.0.1-SNAPSHOT.jar demo.jar
+FROM openjdk:17.0.1-jdk-slim
+COPY --from=build /target/demo-0.0.1-SNAPSHOT.jar demo.jar
 EXPOSE 8080
-CMD ["java", "-jar", "demo.jar"]
+ENTRYPOINT ["java","-jar","demo.jar"]
