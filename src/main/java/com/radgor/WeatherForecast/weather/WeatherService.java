@@ -1,12 +1,10 @@
 package com.radgor.WeatherForecast.weather;
 
 import com.radgor.WeatherForecast.weather.data.CachedWeatherService;
-import com.radgor.WeatherForecast.weather.data.WeatherClient;
 import com.radgor.WeatherForecast.weather.data.WeatherData;
 import com.radgor.WeatherForecast.weather.data.daily.ProcessedDailyData;
 import com.radgor.WeatherForecast.weather.data.daily.ProcessedWeatherDailyData;
 import com.radgor.WeatherForecast.weather.data.summary.SummaryWeatherData;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;

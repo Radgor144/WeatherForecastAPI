@@ -24,7 +24,7 @@ public class WeatherClientCacheConfig {
     }
 
     @CacheEvict(allEntries = true, value = {CACHENAME})
-    @Scheduled(fixedDelay = 1 * 60 * 1000) // refresh cache every 10 minutes
+    @Scheduled(fixedDelay = 10 * 60 * 1000) // refresh cache every 10 minutes
     public void evictCache() {
         log.info("Refresh Cache");
     }
