@@ -1,12 +1,20 @@
-FROM eclipse-temurin:latest
+# Etap budowania (build stage)
+FROM maven:3.8.5-openjdk-21 AS build
 
-# Skopiowanie pliku JAR do obrazu. Upewnij się, że Render będzie generował plik JAR
-# Na Render.com proces budowania aplikacji uruchomi odpowiednie komendy (np. mvn clean package)
-COPY target/*.jar app.jar
+# Skopiowanie kodu źródłowego do kontenera
+COPY . .
 
+# Budowanie aplikacji bez uruchamiania testów
+RUN mvn clean package -DskipTests
 
-# Otworzenie portu 8080 dla aplikacji Spring Boot
+# Etap uruchamiania aplikacji (runtime stage)
+FROM openjdk:21-jdk-slim
+
+# Skopiowanie wygenerowanego pliku JAR z etapu build
+COPY --from=build /target/demo-0.0.1-SNAPSHOT.jar demo.jar
+
+# Otworzenie portu 8080
 EXPOSE 8080
 
 # Uruchomienie aplikacji Spring Boot
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "demo.jar"]
