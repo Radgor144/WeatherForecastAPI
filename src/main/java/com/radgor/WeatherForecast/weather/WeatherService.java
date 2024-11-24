@@ -1,5 +1,6 @@
 package com.radgor.WeatherForecast.weather;
 
+import com.radgor.WeatherForecast.weather.data.CachedWeatherService;
 import com.radgor.WeatherForecast.weather.data.WeatherClient;
 import com.radgor.WeatherForecast.weather.data.WeatherData;
 import com.radgor.WeatherForecast.weather.data.daily.ProcessedDailyData;
@@ -22,27 +23,20 @@ public class WeatherService {
     private static final BigDecimal PANEL_EFFICIENCY = BigDecimal.valueOf(0.2);
     private static final BigDecimal SECONDS_IN_AN_HOUR = BigDecimal.valueOf(3600);
 
-    private final WeatherClient weatherClient;
+    private final CachedWeatherService cachedWeatherService;
 
-    public WeatherService(WeatherClient weatherClient) {
-        this.weatherClient = weatherClient;
-    }
-
-    @Cacheable(value = "WeatherData", key = "#latitude + '-' + #longitude")
-    public WeatherData getWeatherData(double latitude, double longitude) {
-        String dailyParams = "weather_code,temperature_2m_max,temperature_2m_min,sunshine_duration,precipitation_probability_max";
-        String hourlyParams = "surface_pressure";
-        return weatherClient.getWeatherData(latitude, longitude, hourlyParams, dailyParams);
+    public WeatherService(CachedWeatherService cachedWeatherService) {
+        this.cachedWeatherService = cachedWeatherService;
     }
 
     public ProcessedWeatherDailyData getProcessedWeatherData(double latitude, double longitude) {
-        WeatherData weatherData = getWeatherData(latitude, longitude);
+        WeatherData weatherData = cachedWeatherService.getWeatherData(latitude, longitude);
         List<BigDecimal> generatedEnergy_kWh = calculateEnergy(weatherData);
         return mapWeatherDataToProcessedWeatherData(weatherData, generatedEnergy_kWh);
     }
 
     public SummaryWeatherData getSummaryWeatherData(double latitude, double longitude) {
-        WeatherData weatherData = getWeatherData(latitude, longitude);
+        WeatherData weatherData = cachedWeatherService.getWeatherData(latitude, longitude);
         return mapToSummaryWeatherData(weatherData);
     }
 
