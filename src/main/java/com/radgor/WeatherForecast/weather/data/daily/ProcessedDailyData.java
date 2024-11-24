@@ -9,7 +9,7 @@ import java.util.List;
 public record ProcessedDailyData(
         List<String> time,
         List<Integer> weather_code,
-        List<Double> temperature_2m_max,
-        List<Double> temperature_2m_min,
+        List<BigDecimal> temperature_2m_max,
+        List<BigDecimal> temperature_2m_min,
         List<BigDecimal> generatedEnergy_kWh) {}
 
