@@ -1,6 +1,10 @@
 # Etap budowania (build stage)
 FROM eclipse-temurin:latest AS build
 
+# Instalacja Mavena (jeśli nie jest zainstalowany)
+RUN apt-get update && \
+    apt-get install -y maven
+
 # Skopiowanie kodu źródłowego do kontenera
 COPY . .
 
@@ -18,4 +22,3 @@ EXPOSE 8080
 
 # Uruchomienie aplikacji Spring Boot
 ENTRYPOINT ["java", "-jar", "demo.jar"]
-
