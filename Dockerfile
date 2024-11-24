@@ -4,6 +4,7 @@ FROM eclipse-temurin:latest
 # Na Render.com proces budowania aplikacji uruchomi odpowiednie komendy (np. mvn clean package)
 COPY target/*.jar app.jar
 
+
 # Otworzenie portu 8080 dla aplikacji Spring Boot
 EXPOSE 8080
 
