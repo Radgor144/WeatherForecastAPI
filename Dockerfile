@@ -1,24 +1,12 @@
-# Etap budowania (build stage)
-FROM eclipse-temurin:latest AS build
-
-# Instalacja Mavena (jeśli nie jest zainstalowany)
-RUN apt-get update && \
-    apt-get install -y maven
-
-# Skopiowanie kodu źródłowego do kontenera
+# Etap 1: Budowanie aplikacji
+FROM maven:3.8.6-openjdk-11 as build
+WORKDIR /app
 COPY . .
-
-# Budowanie aplikacji bez uruchamiania testów
 RUN mvn clean package -DskipTests
 
-# Etap uruchamiania aplikacji (runtime stage)
-FROM openjdk:21-jdk-slim
-
-# Skopiowanie wygenerowanego pliku JAR z etapu build
-COPY --from=build /target/demo-0.0.1-SNAPSHOT.jar demo.jar
-
-# Otworzenie portu 8080
+# Etap 2: Uruchomienie aplikacji
+FROM openjdk:11-jre-slim
+WORKDIR /app
+COPY --from=build /target/WeatherForecast-0.0.1-SNAPSHOT.jar demo.jar
 EXPOSE 8080
-
-# Uruchomienie aplikacji Spring Boot
-ENTRYPOINT ["java", "-jar", "demo.jar"]
+CMD ["java", "-jar", "demo.jar"]
