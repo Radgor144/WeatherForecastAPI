@@ -10,10 +10,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://weather-forecast-frontend-jua3.onrender.com")
+                .allowedOrigins("http://localhost:3000")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*");
     }
 }
+
+// http://localhost:3000
+// https://weather-forecast-frontend-jua3.onrender.com
 
 
