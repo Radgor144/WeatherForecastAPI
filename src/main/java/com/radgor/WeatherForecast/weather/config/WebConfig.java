@@ -16,4 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 }
 
+// http://localhost:3000
+// https://weather-forecast-frontend-jua3.onrender.com
+
 
