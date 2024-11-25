@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
-public class WeatherServiceTest {
+public class WeatherServiceMethodsTest {
 
-    private static final String RESPONSE_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/WeatherServiceTests/Files/weatherDataResponseFromApi.json";
-    private static final String FORECAST_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/WeatherServiceTests/Files/forecastResponse.json";
-    private static final String SUMMARY_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/WeatherServiceTests/Files/summaryResponse.json";
+    private static final String RESPONSE_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/Files/weatherDataResponseFromApi.json";
+    private static final String FORECAST_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/Files/forecastResponse.json";
+    private static final String SUMMARY_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/Files/summaryResponse.json";
 
     @Autowired
     private ObjectMapper objectMapper;
