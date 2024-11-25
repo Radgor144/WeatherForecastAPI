@@ -3,6 +3,7 @@ package com.radgor.WeatherForecast.ControllerTests;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.radgor.WeatherForecast.Utils.StubUtil;
 import com.radgor.WeatherForecast.WeatherServiceTests.JsonFileReader;
+import com.radgor.WeatherForecast.weather.data.WeatherData;
 import com.radgor.WeatherForecast.weather.data.daily.ProcessedWeatherDailyData;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -17,6 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+
 import static com.radgor.WeatherForecast.Utils.RequestUtil.getForecastRequest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -28,6 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ControllerTest {
 
     private static final String FORECAST_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/Files/forecastResponse.json";
+    private static final String RESPONSE_RESOURCE_PATH = "src/test/java/com/radgor/WeatherForecast/Files/weatherDataResponseFromApi.json";
+
+    private static final String FORECAST_URL_PATH = "forecast";
+    private static final String SUMMARY_URL_PATH = "summary";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -40,14 +46,13 @@ public class ControllerTest {
     @MethodSource("validCoordinatesProvider")
     public void happyPath(double latitude, double longitude) throws IOException {
         // given
-        ProcessedWeatherDailyData expectedProcessedWeatherDailyData = JsonFileReader.readJson(objectMapper, FORECAST_RESOURCE_PATH, ProcessedWeatherDailyData.class);
-        System.out.println("XXX");
-        System.out.println(expectedProcessedWeatherDailyData);
+        var expectedProcessedWeatherDailyData = JsonFileReader.readJson(objectMapper, FORECAST_RESOURCE_PATH, ProcessedWeatherDailyData.class);
+        var weatherData = JsonFileReader.readJson(objectMapper, RESPONSE_RESOURCE_PATH, WeatherData.class);
 
-        StubUtil.stubGetWeatherData(objectMapper, latitude, longitude, expectedProcessedWeatherDailyData);
+        StubUtil.stubGetWeatherData(objectMapper, latitude, longitude, weatherData);
 
         // when
-        var result = getForecastRequest(webTestClient, latitude, longitude);
+        var result = getForecastRequest(webTestClient, FORECAST_URL_PATH, latitude, longitude);
 
         // then
                 result

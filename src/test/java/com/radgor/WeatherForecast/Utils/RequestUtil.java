@@ -5,10 +5,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 
 @UtilityClass
 public class RequestUtil {
-    public static WebTestClient.ResponseSpec getForecastRequest(WebTestClient webTestClient, double latitude, double longitude) {
+    public static WebTestClient.ResponseSpec getForecastRequest(WebTestClient webTestClient, String path, double latitude, double longitude) {
         return webTestClient
                 .get()
-                .uri("/forecast?latitude=" + latitude + "&longitude=" + longitude)
+                .uri("/" + path + "?latitude=" + latitude + "&longitude=" + longitude)
                 .exchange();
     }
 
